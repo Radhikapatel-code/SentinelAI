@@ -1,0 +1,22 @@
+# Core
+numpy>=1.26,<2.0
+pandas>=2.1,<2.3
+
+# Machine Learning
+scikit-learn>=1.4,<1.6
+
+# Explainability
+shap>=0.44,<0.46
+
+# Backend API
+fastapi>=0.110,<0.116
+uvicorn>=0.27,<0.31
+
+# Dashboard
+streamlit>=1.30,<1.36
+
+# HTTP
+requests>=2.31,<2.33
+
+# Visualization (used by Streamlit/SHAP)
+matplotlib>=3.8,<3.10
