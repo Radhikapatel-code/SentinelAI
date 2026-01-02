@@ -1,7 +1,6 @@
 # 🧠 SentinelAI
 ### An Explainable AI Decision Engine for Intelligent Fraud Detection
 
-![SentinelAI Banner](https://raw.githubusercontent.com/your-username/SentinelAI/main/assets/banner.png)
 
 ---
 
@@ -141,6 +140,13 @@ This ensures the system is:
 | Dataset | Credit Card Fraud Dataset (Kaggle) |
 
 ---
+## 📸 Demo
+### Dashboard
+<img width="1911" height="923" alt="image" src="https://github.com/user-attachments/assets/7895b498-20c5-4cb7-84ba-6e72961f21e7" />
+### Decision Output
+<img width="1913" height="699" alt="image" src="https://github.com/user-attachments/assets/6147be66-5772-4ada-a5f1-637a029fe8d2" />
+<img width="1904" height="949" alt="image" src="https://github.com/user-attachments/assets/79f8c529-5e97-4f4b-8b06-821212a0d525" />
+
 
 ## 🧪 Dataset
 
