@@ -1,6 +1,7 @@
 # 🧠 SentinelAI
 ### An Explainable AI Decision Engine for Intelligent Fraud Detection
 
+<<<<<<< HEAD
 [![CI](https://github.com/Radhikapatel-code/SentinelAI/actions/workflows/ci.yml/badge.svg)](https://github.com/Radhikapatel-code/SentinelAI/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,6 +9,8 @@
 [🚀 Live Dashboard](https://sentinelai-dashboard.onrender.com) | [📚 API Docs](https://sentinelai.onrender.com/docs)
 
 ![SentinelAI Banner](https://raw.githubusercontent.com/Radhikapatel-code/SentinelAI/main/assets/banner.png)
+=======
+>>>>>>> d224a9e451548a9e099f7a7c4ef9ab5f006a1f1b
 
 ---
 
@@ -191,6 +194,13 @@ python -m decision_engine.demo
 | **Testing/CI** | Pytest, GitHub Actions |
 
 ---
+## 📸 Demo
+### Dashboard
+<img width="1911" height="923" alt="image" src="https://github.com/user-attachments/assets/7895b498-20c5-4cb7-84ba-6e72961f21e7" />
+### Decision Output
+<img width="1913" height="699" alt="image" src="https://github.com/user-attachments/assets/6147be66-5772-4ada-a5f1-637a029fe8d2" />
+<img width="1904" height="949" alt="image" src="https://github.com/user-attachments/assets/79f8c529-5e97-4f4b-8b06-821212a0d525" />
+
 
 ## 🧪 Development & Testing
 
