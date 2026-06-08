@@ -3,14 +3,14 @@
 # ──────────────────────────────────────────────
 
 # Core
-numpy==2.3.5
+numpy==1.26.4
 pandas==2.3.3
 
 # Machine Learning
-scikit-learn==1.9.0
+scikit-learn==1.4.2
 
 # Explainability
-shap==0.52.0
+shap==0.45.1
 
 # Backend API
 fastapi==0.136.0
