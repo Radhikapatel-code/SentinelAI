@@ -1,0 +1,48 @@
+# ──────────────────────────────────────────────
+# SentinelAI Configuration
+# ──────────────────────────────────────────────
+# All thresholds, model parameters, and cost weights
+# are centralized here. Modify these values to tune
+# the system's behavior without changing source code.
+
+# --- ML Model Parameters ---
+model:
+  contamination: 0.2        # Expected fraction of anomalies (0.0–0.5)
+  n_estimators: 100         # Number of Isolation Forest trees
+  random_state: 42          # Seed for reproducibility
+
+# --- Decision Engine Cost Weights ---
+# Real-world fraud cost model:
+#   fraud_loss:          Cost of allowing a fraudulent transaction through.
+#                        In production, this equals the transaction amount.
+#   false_positive_cost: Cost of blocking a legitimate transaction.
+#                        Includes customer service ($5-10) + churn risk ($5-15).
+#   review_cost:         Fixed cost per manual review (analyst time ≈ $20).
+#
+# Changing these values shifts the decision boundary:
+#   Higher fraud_loss    → more aggressive blocking
+#   Higher FP cost       → more lenient approvals
+#   Lower review_cost    → more cases sent to review
+cost:
+  fraud_loss: 1000.0
+  false_positive_cost: 50.0
+  review_cost: 20.0
+
+# --- Risk Categorization Thresholds ---
+risk:
+  high_risk_threshold: 0.7    # Above this → high risk
+  medium_risk_threshold: 0.3  # Above this → medium risk
+
+# --- API Server ---
+api:
+  host: "127.0.0.1"
+  port: 8000
+  data_path: "data/transactions.csv"
+
+# --- LLM Explanation Layer (Optional) ---
+# Set enabled: false to use only SHAP-based explanations.
+# API key should be set via OPENAI_API_KEY env var, not here.
+llm:
+  enabled: true
+  model: "gpt-4o-mini"
+  max_tokens: 150

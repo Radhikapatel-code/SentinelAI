@@ -1,0 +1,2 @@
+# This directory stores trained model artifacts.
+# Regenerate with: python notebooks/run_evaluation.py

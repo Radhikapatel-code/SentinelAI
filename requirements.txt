@@ -1,22 +1,34 @@
+# ──────────────────────────────────────────────
+# SentinelAI Dependencies (pinned versions)
+# ──────────────────────────────────────────────
+
 # Core
-numpy>=1.26,<2.0
-pandas>=2.1,<2.3
+numpy==2.3.5
+pandas==2.3.3
 
 # Machine Learning
-scikit-learn>=1.4,<1.6
+scikit-learn==1.9.0
 
 # Explainability
-shap>=0.44,<0.46
+shap==0.52.0
 
 # Backend API
-fastapi>=0.110,<0.116
-uvicorn>=0.27,<0.31
+fastapi==0.136.0
+uvicorn==0.45.0
 
 # Dashboard
-streamlit>=1.30,<1.36
+streamlit==1.52.2
 
 # HTTP
-requests>=2.31,<2.33
+requests==2.32.5
+httpx==0.28.1
 
-# Visualization (used by Streamlit/SHAP)
-matplotlib>=3.8,<3.10
+# Visualization
+matplotlib==3.10.8
+
+# Configuration (optional — falls back to defaults if not installed)
+pyyaml>=6.0
+
+# Testing (dev dependencies)
+# pytest==9.0.3
+# pytest-cov==7.1.0

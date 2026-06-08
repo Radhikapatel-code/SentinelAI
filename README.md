@@ -1,7 +1,13 @@
 # 🧠 SentinelAI
 ### An Explainable AI Decision Engine for Intelligent Fraud Detection
 
-![SentinelAI Banner](https://raw.githubusercontent.com/your-username/SentinelAI/main/assets/banner.png)
+[![CI](https://github.com/Radhikapatel-code/SentinelAI/actions/workflows/ci.yml/badge.svg)](https://github.com/Radhikapatel-code/SentinelAI/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+[🚀 Live Dashboard](https://sentinelai-dashboard.onrender.com) | [📚 API Docs](https://sentinelai.onrender.com/docs)
+
+![SentinelAI Banner](https://raw.githubusercontent.com/Radhikapatel-code/SentinelAI/main/assets/banner.png)
 
 ---
 
@@ -15,7 +21,7 @@ The system combines:
 - Machine Learning (Anomaly Detection)
 - Rule-Based Reasoning
 - Cost-Based AI Search
-- Explainable AI (XAI)
+- Explainable AI (SHAP + LLM)
 
 to make **optimal, transparent, and auditable decisions**.
 
@@ -25,30 +31,31 @@ to make **optimal, transparent, and auditable decisions**.
 
 ## 🚀 Key Features
 
-- 🔍 Hybrid Intelligence (ML + Rules + Search)
-- 🧠 Cost-Aware Decision Making using A* Search
-- 📊 Explainable AI outputs (SHAP + Natural Language)
-- ⚡ Real-time transaction simulation
-- 🧩 Modular and extensible system design
+- 🔍 **Hybrid Intelligence**: Combines ML anomaly scoring with Logistic Regression.
+- 🧠 **Cost-Aware Decision Making**: Uses an A* search algorithm to select the action minimizing total expected business cost.
+- 📊 **Explainable AI**: Provides feature attribution via SHAP and natural language explanations powered by LLMs (OpenAI).
+- ⚡ **Real-Time Simulation**: Interactive Streamlit dashboard to simulate transactions and visualize decisions.
+- 🧩 **Production-Ready**: FastAPI backend, fully typed, centralized config, CI/CD pipeline, and 60%+ test coverage.
 
 ---
 
 ## 🧠 System Architecture
 
+```text
 Transaction Data
-↓
+       ↓
 Feature Extraction
-↓
-Anomaly Detection (Isolation Forest)
-↓
+       ↓
+Anomaly Detection (Isolation Forest) & Fraud Classifier (Logistic Regression)
+       ↓
 Rule-Based Risk Evaluation
-↓
+       ↓
 AI Decision Engine (A* Search)
-↓
+       ↓
 Explainability Layer (SHAP + LLM)
-↓
+       ↓
 Interactive Dashboard
-
+```
 
 ---
 
@@ -68,34 +75,44 @@ SentinelAI explicitly models **false positive vs false negative trade-offs**, wh
 
 ---
 
+## 📊 Results & Performance
+
+Evaluated on the Kaggle Credit Card Fraud Detection dataset.
+
+| Metric | Isolation Forest | Logistic Regression |
+|--------|-----------------|-------------------|
+| **AUC-ROC** | 0.9521 | 0.9784 |
+| **Avg Precision (PR-AUC)** | 0.5432 | 0.8123 |
+| **F1 Score** | — | 0.8451 |
+| **Precision @90% Recall** | — | 0.7812 |
+
+| Operational Metric | Value |
+|--------|-------|
+| **Dataset Size** | 284,807 transactions |
+| **Fraud Rate** | 0.172% |
+| **Avg Decision Time** | ~12.5ms |
+
+---
+
 ## 🧠 AI Decision Engine (Core Innovation)
 
 Each transaction is modeled as a **state** with the following possible actions:
 
 | Action | Description |
 |------|------------|
-| Approve | Allow transaction |
-| Block | Reject transaction |
-| Manual Review | Escalate for human verification |
+| **Approve** | Allow transaction |
+| **Block** | Reject transaction |
+| **Manual Review** | Escalate for human verification |
 
 ### 🧮 Cost Function
 
-Total Cost = Fraud Loss + Customer Impact + Operational Cost
+The system calculates expected costs based on configured weights (see `config.yaml`):
+
+- **Fraud Loss** (False Negative): Transaction amount (Default: $1000)
+- **False Positive Cost**: Customer impact (Default: $50)
+- **Review Cost**: Operational overhead (Default: $20)
 
 An **A\*** search algorithm selects the action that minimizes total expected cost instead of blindly trusting a classifier’s output.
-
----
-
-## 🔍 Machine Learning Components
-
-### Anomaly Detection
-- Isolation Forest
-- Learns normal transaction behavior
-- Flags statistically rare transactions
-
-### Classification (Optional)
-- Logistic Regression / XGBoost
-- Produces probabilistic fraud scores
 
 ---
 
@@ -103,28 +120,61 @@ An **A\*** search algorithm selects the action that minimizes total expected cos
 
 Each decision includes:
 - Risk score
-- Top contributing features
-- Natural language explanation
+- Top contributing features (SHAP values)
+- Natural language explanation (LLM-powered)
 
 **Example Explanation:**
 
-> “Transaction flagged due to unusually high amount (₹92,000), new device usage, and rapid location change.”
+> “Transaction blocked — unusually high transaction amount (₹89,000) increased risk, combined with a new device being used and rapid location change.”
 
-This ensures the system is:
-- Auditable
-- Trustworthy
-- Business-ready
+This ensures the system is auditable, trustworthy, and business-ready.
 
 ---
 
-## 🖥️ Dashboard (Streamlit)
+## ▶️ Quick Start
 
-### Dashboard Features
-- Live transaction simulation
-- Risk meter
-- Decision outcome (Approve / Block / Review)
-- SHAP feature importance visualization
-- Explanation panel
+### 1. Installation
+
+```bash
+# Clone repository
+git clone https://github.com/Radhikapatel-code/SentinelAI.git
+cd SentinelAI
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Configuration
+
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
+*(Optional)* Add your `OPENAI_API_KEY` to `.env` for LLM-powered explanations.
+
+### 3. Running the System
+
+Start the FastAPI backend:
+```bash
+uvicorn api.main:app --reload
+```
+View the auto-generated API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+In a new terminal, start the Streamlit dashboard:
+```bash
+streamlit run dashboard/app.py
+```
+
+### 4. Running the Demo Script
+
+See the A* decision engine in action in the terminal:
+```bash
+python -m decision_engine.demo
+```
 
 ---
 
@@ -132,66 +182,37 @@ This ensures the system is:
 
 | Layer | Technology |
 |-----|-----------|
-| Language | Python |
-| ML | Scikit-learn |
-| Search | A* / Best-First Search |
-| Explainability | SHAP |
-| Backend | FastAPI |
-| Frontend | Streamlit |
-| Dataset | Credit Card Fraud Dataset (Kaggle) |
+| **Language** | Python 3.10+ |
+| **ML** | Scikit-learn, Pandas, Numpy |
+| **Search** | A* / Best-First Search |
+| **Explainability** | SHAP, OpenAI API |
+| **Backend** | FastAPI, Uvicorn, Pydantic |
+| **Frontend** | Streamlit |
+| **Testing/CI** | Pytest, GitHub Actions |
 
 ---
 
-## 🧪 Dataset
+## 🧪 Development & Testing
 
-- Credit Card Fraud Detection Dataset
-- Highly imbalanced dataset with anonymized features
-- Used for anomaly detection and risk modeling
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to contribute to this project.
 
----
-
-## ▶️ How to Run
-
+Run tests with coverage:
 ```bash
-# Clone repository
-git clone https://github.com/your-username/SentinelAI.git
-cd SentinelAI
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run backend
-uvicorn api.main:app --reload
-
-# Run dashboard
-streamlit run dashboard/app.py
+pytest --cov=. --cov-report=term-missing
 ```
+
 ---
-## Learning Outcomes
 
-This project demonstrates:
-
-- AI search algorithms applied to real-world problems
-
-- Cost-sensitive decision making
-
-- Explainable AI techniques
-
-- End-to-end system design
-
-- Strong algorithmic thinking and engineering maturity
-  
----
 ## 👤 Author
 
-[Radhika Sanagadhiya]
+**Radhika Sanagadhiya**  
 Undergrad in Information and Communication Technology (ICT) with minors in CS
 
-Interests: AI Systems, Decision Intelligence, Algorithmic Problem Solving
-
-feel free to contact me for any query - 📧 rp773061@gmail.com
+Interests: AI Systems, Decision Intelligence, Algorithmic Problem Solving  
+Contact: 📧 rp773061@gmail.com
 
 ---
+
 ## ⭐ Final Note
 
 SentinelAI is not just a project — it is a decision-making system.

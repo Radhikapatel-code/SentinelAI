@@ -1,5 +1,37 @@
+# Virtual environment
 venv/
+.venv/
+
+# Python bytecode
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Jupyter
 .ipynb_checkpoints/
+
+# Environment
 .env
+
+# IDE
+.vscode/
+.idea/
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large datasets (download separately)
+data/creditcard.csv
+
+# Model artifacts (regenerate with notebooks/run_evaluation.py)
+models/artifacts/*.pkl
