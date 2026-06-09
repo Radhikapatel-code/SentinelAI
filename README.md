@@ -1,16 +1,11 @@
 # 🧠 SentinelAI
 ### An Explainable AI Decision Engine for Intelligent Fraud Detection
 
-<<<<<<< HEAD
 [![CI](https://github.com/Radhikapatel-code/SentinelAI/actions/workflows/ci.yml/badge.svg)](https://github.com/Radhikapatel-code/SentinelAI/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[🚀 Live Dashboard](https://sentinelai-dashboard.onrender.com) | [📚 API Docs](https://sentinelai.onrender.com/docs)
-
 ![SentinelAI Banner](https://raw.githubusercontent.com/Radhikapatel-code/SentinelAI/main/assets/banner.png)
-=======
->>>>>>> d224a9e451548a9e099f7a7c4ef9ab5f006a1f1b
 
 ---
 

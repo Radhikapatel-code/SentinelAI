@@ -1,34 +1,13 @@
-# ──────────────────────────────────────────────
-# SentinelAI Dependencies (pinned versions)
-# ──────────────────────────────────────────────
-
-# Core
 numpy==1.26.4
-pandas==2.3.3
-
-# Machine Learning
+pandas==2.2.2
 scikit-learn==1.4.2
-
-# Explainability
 shap==0.45.1
-
-# Backend API
-fastapi==0.136.0
-uvicorn==0.45.0
-
-# Dashboard
-streamlit==1.52.2
-
-# HTTP
-requests==2.32.5
+fastapi==0.111.0
+uvicorn==0.30.1
+streamlit==1.35.0
+requests==2.32.3
+matplotlib==3.9.0
+pyyaml==6.0.2
+pytest==8.3.5
+pytest-cov==6.1.0
 httpx==0.28.1
-
-# Visualization
-matplotlib==3.10.8
-
-# Configuration (optional — falls back to defaults if not installed)
-pyyaml>=6.0
-
-# Testing (dev dependencies)
-# pytest==9.0.3
-# pytest-cov==7.1.0
