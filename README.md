@@ -79,16 +79,16 @@ Evaluated on the Kaggle Credit Card Fraud Detection dataset.
 
 | Metric | Isolation Forest | Logistic Regression |
 |--------|-----------------|-------------------|
-| **AUC-ROC** | 0.9521 | 0.9784 |
-| **Avg Precision (PR-AUC)** | 0.5432 | 0.8123 |
-| **F1 Score** | — | 0.8451 |
-| **Precision @90% Recall** | — | 0.7812 |
+| **AUC-ROC** | 0.9474 | 0.9699 |
+| **Avg Precision (PR-AUC)** | 0.1781 | 0.7017 |
+| **F1 Score** | — | 0.1193 |
+| **Precision @90% Recall** | — | 0.0226 |
 
 | Operational Metric | Value |
 |--------|-------|
 | **Dataset Size** | 284,807 transactions |
-| **Fraud Rate** | 0.172% |
-| **Avg Decision Time** | ~12.5ms |
+| **Fraud Rate** | 0.173% |
+| **Avg Decision Time** | ~0.6ms |
 
 ---
 

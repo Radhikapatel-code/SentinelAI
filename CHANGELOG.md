@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.2.0] - 2026-06-08
 
 ### Added
-- Unit test suite with pytest (43 tests across 4 test modules)
+- Unit test suite with pytest (44 tests across 4 test modules)
 - GitHub Actions CI pipeline with multi-version Python testing
 - Centralized configuration system (`config.py` + `config.yaml`)
 - LLM-powered explanation layer with OpenAI integration and fallback
