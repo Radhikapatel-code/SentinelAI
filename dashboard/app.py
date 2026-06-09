@@ -13,6 +13,7 @@ Environment Variables:
 """
 
 import os
+import time
 
 import streamlit as st
 import requests
@@ -69,16 +70,29 @@ if st.button("🔍 Analyze Transaction", type="primary"):
         "merchant_risk": merchant_risk,
     }
 
-    with st.spinner("Analyzing transaction..."):
-        try:
-            response = requests.post(ANALYZE_ENDPOINT, json=payload, timeout=30)
-        except requests.ConnectionError:
-            st.error(
-                "❌ Cannot connect to the API. "
-                f"Is the backend running at {API_URL}?"
-            )
-            st.info("Start the backend with: `uvicorn api.main:app --reload`")
-            st.stop()
+    with st.spinner("Analyzing transaction... (first request may take ~30s if the server is waking up)"):
+        response = None
+        for attempt in range(2):
+            try:
+                response = requests.post(ANALYZE_ENDPOINT, json=payload, timeout=90)
+                break
+            except requests.exceptions.ReadTimeout:
+                if attempt == 0:
+                    st.warning("⏳ Server is waking up (free tier cold start). Retrying...")
+                    time.sleep(5)
+                else:
+                    st.error(
+                        "❌ Request timed out. The backend may still be starting up. "
+                        "Please wait a moment and try again."
+                    )
+                    st.stop()
+            except requests.ConnectionError:
+                st.error(
+                    "❌ Cannot connect to the API. "
+                    f"Is the backend running at {API_URL}?"
+                )
+                st.info("Start the backend with: `uvicorn api.main:app --reload`")
+                st.stop()
 
     if response.status_code == 200:
         result: dict = response.json()
@@ -151,6 +165,6 @@ if st.button("🔍 Analyze Transaction", type="primary"):
 st.markdown("---")
 st.caption(
     "SentinelAI v0.2.0 | "
-    "[API Docs](http://localhost:8000/docs) | "
+    f"[API Docs]({API_URL}/docs) | "
     "Built with FastAPI + Streamlit"
 )
