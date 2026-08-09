@@ -1,0 +1,54 @@
+{
+  "baseline": {
+    "count": 1000,
+    "total_time_seconds": 12.384,
+    "throughput_tx_sec": 80.7,
+    "latency_p50_ms": 12.034,
+    "latency_p95_ms": 13.846,
+    "latency_p99_ms": 18.013,
+    "latency_mean_ms": 12.384,
+    "latency_max_ms": 59.851
+  },
+  "scaling": [
+    {
+      "worker_count": 1,
+      "total_transactions": 1000,
+      "total_time_seconds": 12.319,
+      "aggregate_throughput_tx_sec": 81.2,
+      "latency_p50_ms": 11.787,
+      "latency_p95_ms": 14.817,
+      "latency_p99_ms": 21.543,
+      "latency_mean_ms": 12.311
+    },
+    {
+      "worker_count": 2,
+      "total_transactions": 1000,
+      "total_time_seconds": 7.077,
+      "aggregate_throughput_tx_sec": 141.3,
+      "latency_p50_ms": 11.98,
+      "latency_p95_ms": 20.719,
+      "latency_p99_ms": 23.014,
+      "latency_mean_ms": 14.132
+    },
+    {
+      "worker_count": 4,
+      "total_transactions": 1000,
+      "total_time_seconds": 6.361,
+      "aggregate_throughput_tx_sec": 157.2,
+      "latency_p50_ms": 24.232,
+      "latency_p95_ms": 39.393,
+      "latency_p99_ms": 47.178,
+      "latency_mean_ms": 25.002
+    },
+    {
+      "worker_count": 8,
+      "total_transactions": 1000,
+      "total_time_seconds": 5.276,
+      "aggregate_throughput_tx_sec": 189.5,
+      "latency_p50_ms": 35.147,
+      "latency_p95_ms": 56.559,
+      "latency_p99_ms": 118.801,
+      "latency_mean_ms": 39.25
+    }
+  ]
+}

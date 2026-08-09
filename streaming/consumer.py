@@ -180,20 +180,43 @@ class ScoringWorker:
         total_scored = 0
         total_errors = 0
         batch_start = time.time()
+        batch_size = 50
+        result_buffer: list[ScoringResult] = []
+        pending_msgs: list = []
+
+        def flush_batch() -> None:
+            nonlocal total_scored, total_errors
+            if not result_buffer:
+                return
+            try:
+                self.sink.write_batch(result_buffer)
+                # Commit offset of the latest message in batch
+                self.consumer.commit(pending_msgs[-1])
+                total_scored += len(result_buffer)
+            except Exception as e:
+                logger.error(
+                    "Worker %s batch sink write/commit failed (%d items): %s",
+                    self.worker_id, len(result_buffer), e,
+                )
+                total_errors += len(result_buffer)
+            finally:
+                result_buffer.clear()
+                pending_msgs.clear()
 
         logger.info("Worker %s entering main loop", self.worker_id)
 
         try:
             while not self._shutdown_requested:
                 # Poll for messages
-                msg = self.consumer.poll(timeout=1.0)
+                msg = self.consumer.poll(timeout=0.1)
 
                 if msg is None:
+                    flush_batch()
                     continue
 
                 if msg.error():
+                    flush_batch()
                     if msg.error().code() == KafkaError._PARTITION_EOF:
-                        # End of partition — normal, keep polling
                         continue
                     else:
                         logger.error(
@@ -214,7 +237,6 @@ class ScoringWorker:
                         self.worker_id, e,
                     )
                     total_errors += 1
-                    # Commit offset to skip malformed messages
                     self.consumer.commit(msg)
                     continue
 
@@ -229,24 +251,15 @@ class ScoringWorker:
                     total_errors += 1
                     continue
 
-                # Write to sinks
-                try:
-                    self.sink.write_batch([result])
-                except Exception as e:
-                    logger.error(
-                        "Worker %s sink write failed for tx %d: %s",
-                        self.worker_id, result.transaction_id, e,
-                    )
-                    total_errors += 1
-                    # Don't commit offset — message will be reprocessed
-                    continue
+                # Accumulate into batch buffer
+                result_buffer.append(result)
+                pending_msgs.append(msg)
 
-                # Commit offset ONLY after successful sink write
-                self.consumer.commit(msg)
-                total_scored += 1
+                if len(result_buffer) >= batch_size:
+                    flush_batch()
 
                 # Periodic progress logging
-                if total_scored % 500 == 0:
+                if total_scored > 0 and total_scored % 500 == 0:
                     elapsed = time.time() - batch_start
                     rate = 500 / max(elapsed, 0.001)
                     logger.info(
@@ -255,8 +268,11 @@ class ScoringWorker:
                     )
                     batch_start = time.time()
 
+            # Flush remaining items on graceful shutdown signal
+            flush_batch()
         except KeyboardInterrupt:
             logger.info("Worker %s interrupted", self.worker_id)
+            flush_batch()
         finally:
             self._shutdown(total_scored, total_errors)
 

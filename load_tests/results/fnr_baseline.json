@@ -11,6 +11,6 @@
     "block": 22,
     "review": 502
   },
-  "throughput_tx_sec": 28.6,
-  "total_time_seconds": 34.934
+  "throughput_tx_sec": 81.0,
+  "total_time_seconds": 12.349
 }

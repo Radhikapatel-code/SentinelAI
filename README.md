@@ -101,20 +101,21 @@ See [Resilience Test Results](docs/RESILIENCE.md) for full benchmarks.
 
 See [Load Test Results](docs/LOAD_TEST_RESULTS.md) for full metrics.
 
-| Scale Configuration | Throughput | p50 Latency | p99 Latency | False Negative Rate (FNR) |
-|---------------------|------------|-------------|-------------|--------------------------|
-| **1 Worker (Baseline)** | **71.7 tx/sec** | **13.52ms** | **20.54ms** | **0.0000%** |
-| **2 Workers** | **38.4 tx/sec** | **12.78ms** | **22.29ms** | **0.0000%** |
-| **4 Workers** | **36.2 tx/sec** | **14.93ms** | **24.51ms** | **0.0000%** |
+| Scale Configuration | Aggregate Throughput | p50 Latency | p99 Latency | False Negative Rate (FNR) |
+|---------------------|---------------------|-------------|-------------|--------------------------|
+| **1 Worker (Baseline)** | **81.2 tx/sec** | **11.79 ms** | **21.54 ms** | **0.00%** |
+| **2 Workers** | **141.3 tx/sec** | **11.98 ms** | **23.01 ms** | **0.00%** |
+| **4 Workers** | **157.2 tx/sec** | **24.23 ms** | **47.18 ms** | **0.00%** |
+| **8 Workers** | **189.5 tx/sec** | **35.15 ms** | **118.80 ms**| **0.00%** |
 
-> 🎯 **Model Quality**: **0.0000% False Negative Rate** across 1,000 evaluated streaming transactions (0 fraud transactions approved).
+> 🎯 **Model Quality**: **0.00% False Negative Rate** across 1,000 evaluated streaming transactions (0 fraud transactions approved).
 
 ---
 
 ## 📝 Resume Integration & Interview Prep
 
 ### Resume Bullet
-> *"Architected a distributed real-time fraud scoring pipeline using Redpanda and Python multiprocessing, sustaining 500+ tx/sec with sub-25ms p99 latency while maintaining a 0.0000% False Negative Rate under simulated load bursts."*
+> *"Scaled real-time transaction scoring from 81.2 to 189.5 tx/sec across a 12-partition Redpanda consumer group using Python multiprocessing and consumer I/O batching, maintaining a 0.00% False-Negative Rate under load."*
 
 ### 🎙️ Verbal Walkthrough
 Refer to [docs/VERBAL_WALKTHROUGH.md](docs/VERBAL_WALKTHROUGH.md) for a 2-minute spoken interview script covering partitioning choices, GIL concurrency, and fault recovery.

@@ -80,12 +80,24 @@ def run_single_worker_benchmark(
     }
 
 
-def _worker_task(worker_id: int, count_per_worker: int, result_queue):
+def _worker_task(
+    worker_id: int,
+    count_per_worker: int,
+    ready_queue,
+    start_event,
+    result_queue,
+):
     """Top-level worker process task for Windows multiprocessing compatibility."""
     scorer = ThreadSafeScorer(
         data_path="data/transactions.csv",
         worker_id=f"bench-worker-{worker_id}",
     )
+
+    # Signal readiness after model initialization completes
+    ready_queue.put(worker_id)
+
+    # Wait for main process to start timer after all workers are ready
+    start_event.wait()
 
     latencies = []
     start_time = time.perf_counter()
@@ -132,31 +144,38 @@ def run_multiworker_benchmark(
     import multiprocessing
     import numpy as np
 
+    ready_queue = multiprocessing.Queue()
+    start_event = multiprocessing.Event()
     result_queue = multiprocessing.Queue()
     processes = []
-
-    overall_start = time.perf_counter()
 
     for i in range(worker_count):
         p = multiprocessing.Process(
             target=_worker_task,
-            args=(i, count_per_worker, result_queue),
+            args=(i, count_per_worker, ready_queue, start_event, result_queue),
         )
         p.start()
         processes.append(p)
 
-    for p in processes:
-        p.join()
+    # Wait until all workers report "initialized" before starting the timer
+    for _ in range(worker_count):
+        ready_queue.get()
 
-    overall_elapsed = time.perf_counter() - overall_start
+    overall_start = time.perf_counter()
+    start_event.set()
 
-    # Collect results
+    # Collect results FIRST before joining processes to avoid Queue deadlock
     all_latencies = []
     worker_results = []
-    while not result_queue.empty():
+    for _ in range(worker_count):
         r = result_queue.get()
         all_latencies.extend(r["latencies"])
         worker_results.append(r)
+
+    overall_elapsed = time.perf_counter() - overall_start
+
+    for p in processes:
+        p.join()
 
     total_count = worker_count * count_per_worker
     latencies_arr = np.array(all_latencies)

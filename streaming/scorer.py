@@ -87,15 +87,19 @@ class ThreadSafeScorer:
             "Initializing scorer (worker=%s, data=%s)", worker_id, data_path
         )
 
-        # Load training data
-        df = pd.read_csv(data_path)
+        # Load pre-trained models via joblib (fast deserialization)
+        import joblib
+        output_dir = os.path.join(_PROJECT_ROOT, "models", "artifacts")
+        ad_path = os.path.join(output_dir, "anomaly_detector.pkl")
+        clf_path = os.path.join(output_dir, "classifier.pkl")
 
-        # Train models (one-time mutable operation)
-        self.anomaly_detector = AnomalyDetector()
-        self.anomaly_detector.fit(df)
+        if not (os.path.exists(ad_path) and os.path.exists(clf_path)):
+            logger.info("Pre-trained model artifacts missing. Training models once...")
+            from scripts.train_models import train_and_save_models
+            train_and_save_models(data_path=data_path, output_dir=output_dir)
 
-        self.classifier = FraudClassifier()
-        self.classifier.fit(df)
+        self.anomaly_detector = joblib.load(ad_path)
+        self.classifier = joblib.load(clf_path)
 
         # Cost function and decision engine (stateless after init)
         self.cost_function = CostFunction(
