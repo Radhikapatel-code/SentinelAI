@@ -14,7 +14,7 @@
 
 ## 📌 Overview & Stated Performance Goal
 
-**SentinelAI** is a horizontally-scalable fraud detection system built to **sustain 500 tx/sec with bursts up to 2,500 tx/sec** under sub-25ms p99 scoring latency — while holding the **false-negative rate constant at 0.0000%**.
+**SentinelAI** is a horizontally-scalable fraud detection system maintaining **sub-25ms p99 scoring latency at up to 2 parallel worker processes (81.2 → 141.3 tx/sec)**, scaling up to **189.5 tx/sec** at higher worker concurrency — while holding the **false-negative rate constant at 0.00%**.
 
 Unlike traditional batch classifiers, SentinelAI treats fraud detection as an online **cost-optimized decision search** powered by Isolation Forest anomaly scoring, Logistic Regression risk probabilities, and cost-aware A* search executed across a distributed worker pool.
 
@@ -97,18 +97,23 @@ See [Resilience Test Results](docs/RESILIENCE.md) for full benchmarks.
 
 ---
 
-## 📊 Benchmark & Accuracy Results
+## 📊 Benchmark & Hardware Scaling Results
 
 See [Load Test Results](docs/LOAD_TEST_RESULTS.md) for full metrics.
 
-| Scale Configuration | Aggregate Throughput | p50 Latency | p99 Latency | False Negative Rate (FNR) |
-|---------------------|---------------------|-------------|-------------|--------------------------|
-| **1 Worker (Baseline)** | **81.2 tx/sec** | **11.79 ms** | **21.54 ms** | **0.00%** |
-| **2 Workers** | **141.3 tx/sec** | **11.98 ms** | **23.01 ms** | **0.00%** |
-| **4 Workers** | **157.2 tx/sec** | **24.23 ms** | **47.18 ms** | **0.00%** |
-| **8 Workers** | **189.5 tx/sec** | **35.15 ms** | **118.80 ms**| **0.00%** |
+> 💻 **Test Hardware**: **4 Physical Cores / 8 Logical Threads** x86_64 CPU, 16 GB RAM, Windows 11.
 
-> 🎯 **Model Quality**: **0.00% False Negative Rate** across 1,000 evaluated streaming transactions (0 fraud transactions approved).
+| Scale Configuration | Aggregate Throughput | Scaling Efficiency | p50 Latency | p99 Latency | Sub-25ms Budget Met? | False Negative Rate (FNR) |
+|---------------------|---------------------|--------------------|-------------|-------------|----------------------|--------------------------|
+| **1 Worker (Baseline)** | **81.2 tx/sec** | — | **11.79 ms** | **21.54 ms** | ✅ Yes | **0.00%** (0 / 12) |
+| **2 Workers** | **141.3 tx/sec** | **1.74x** (Near-linear) | **11.98 ms** | **23.01 ms** | ✅ Yes | **0.00%** (0 / 12) |
+| **4 Workers** | **157.2 tx/sec** | 1.11x (Core ceiling) | **24.23 ms** | **47.18 ms** | ⚠️ Exceeded (47ms) | **0.00%** (0 / 12) |
+| **8 Workers** | **189.5 tx/sec** | 1.21x (Contention) | **35.15 ms** | **118.80 ms**| ❌ Exceeded (118ms)| **0.00%** (0 / 12) |
+
+> 🎯 **Hardware Bottleneck & Model Quality**:
+> - **1 → 2 Workers**: Scales near-linearly (**1.74x**) within sub-25ms p99 latency (**23.01ms**) on dedicated physical cores.
+> - **4 → 8 Workers**: Saturates 4 physical CPU cores; OS thread scheduling context-switching increases p99 latency to **47.18ms** (4 workers) and **118.80ms** (8 workers).
+> - **Model Quality**: **0.00% False Negative Rate** (0 / 12 fraud cases approved out of 1,000 test transactions; 0.173% base fraud rate).
 
 ---
 

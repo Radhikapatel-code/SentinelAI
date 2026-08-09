@@ -62,6 +62,7 @@ pytest tests/resilience/test_traffic_spike.py -v
 | **Deterministic scoring** | Same input → identical output | 100% identical outputs | PASSED |
 | **Concurrent thread safety** | 4 parallel threads, 100 tx | 0 race conditions, exact match | PASSED |
 | **Database sink UPSERT** | Duplicate Kafka deliveries | `ON CONFLICT (transaction_id) DO UPDATE` | PASSED |
+| **False Negative Rate (FNR)** | 0% fraud missed | **0.00%** (0 / 12 fraud cases approved in 1,000 tx sample) | PASSED |
 
 **Test Command:**
 ```bash
