@@ -1,0 +1,34 @@
+# ──────────────────────────────────────────────
+# SentinelAI — Prometheus Scrape Configuration
+# ──────────────────────────────────────────────
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # API metrics
+  - job_name: "sentinel-api"
+    static_configs:
+      - targets: ["api:8001"]
+        labels:
+          component: "api"
+
+  # Worker metrics (scraped via Docker service discovery)
+  # Each worker exposes metrics on port 8001
+  - job_name: "sentinel-workers"
+    dns_sd_configs:
+      - names: ["worker"]
+        type: "A"
+        port: 8001
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+
+  # Redpanda metrics (optional — Redpanda exports Prometheus metrics natively)
+  - job_name: "redpanda"
+    static_configs:
+      - targets: ["redpanda:9644"]
+        labels:
+          component: "broker"
+    metrics_path: /public_metrics

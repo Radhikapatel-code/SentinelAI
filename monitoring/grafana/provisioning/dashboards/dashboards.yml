@@ -1,0 +1,15 @@
+# ──────────────────────────────────────────────
+# Grafana — Dashboard Auto-provisioning
+# ──────────────────────────────────────────────
+
+apiVersion: 1
+
+providers:
+  - name: "SentinelAI"
+    orgId: 1
+    folder: "SentinelAI"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json

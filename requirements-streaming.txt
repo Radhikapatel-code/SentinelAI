@@ -1,0 +1,12 @@
+# ──────────────────────────────────────────────
+# SentinelAI — Streaming Dependencies
+# ──────────────────────────────────────────────
+# Additional dependencies for the real-time pipeline.
+# Install alongside requirements.txt:
+#   pip install -r requirements.txt -r requirements-streaming.txt
+
+confluent-kafka>=2.3.0
+psycopg2-binary>=2.9.9
+redis>=5.0.0
+prometheus-client>=0.20.0
+python-json-logger>=2.0.0

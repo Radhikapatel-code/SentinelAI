@@ -1,0 +1,200 @@
+# ──────────────────────────────────────────────
+# SentinelAI Real-Time Pipeline — Docker Compose
+# ──────────────────────────────────────────────
+# Usage:
+#   docker compose up -d                    # Start all services
+#   docker compose up --scale worker=8 -d   # Scale workers
+#   docker compose down -v                  # Stop and clean up
+#
+# Services:
+#   redpanda    — Kafka-compatible broker (no ZooKeeper)
+#   postgres    — Scored transaction storage
+#   redis       — Real-time cache + pub/sub
+#   api         — FastAPI backend
+#   worker      — Scoring worker (scalable)
+#   producer    — Transaction replay (one-shot)
+#   prometheus  — Metrics collection
+#   grafana     — Dashboards
+
+version: "3.9"
+
+services:
+  # ── Message Broker ──────────────────────────
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.1
+    container_name: sentinel-redpanda
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=512M
+      - --overprovisioned
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr=internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr=internal://redpanda:8082,external://localhost:18082
+      - --schema-registry-addr=internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --advertise-schema-registry-addr=internal://redpanda:8081,external://localhost:18081
+    ports:
+      - "19092:19092"   # Kafka API (external)
+      - "18082:18082"   # Pandaproxy (external)
+      - "18081:18081"   # Schema Registry (external)
+      - "9644:9644"     # Admin API
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Topic creation (runs once then exits)
+  redpanda-init:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.1
+    container_name: sentinel-redpanda-init
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: /bin/bash
+    command: |
+      -c "
+      rpk topic create transactions \
+        --brokers redpanda:9092 \
+        --partitions 12 \
+        --replicas 1 \
+        --topic-config retention.ms=86400000 && \
+      rpk topic create scored-transactions \
+        --brokers redpanda:9092 \
+        --partitions 12 \
+        --replicas 1 \
+        --topic-config retention.ms=86400000 && \
+      echo '✓ Topics created successfully'
+      "
+
+  # ── PostgreSQL ──────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: sentinel-postgres
+    environment:
+      POSTGRES_DB: sentinel
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: sentinel_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/01_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Redis ───────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: sentinel-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── FastAPI Backend ─────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: sentinel-api
+    ports:
+      - "8000:8000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      POSTGRES_DSN: postgresql://sentinel:sentinel_dev@postgres:5432/sentinel
+      REDIS_URL: redis://redis:6379/0
+      METRICS_PORT: "8001"
+    depends_on:
+      redpanda:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Scoring Workers (scalable) ──────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      KAFKA_CONSUMER_GROUP: sentinel-scorers
+      KAFKA_TOPIC: transactions
+      POSTGRES_DSN: postgresql://sentinel:sentinel_dev@postgres:5432/sentinel
+      REDIS_URL: redis://redis:6379/0
+      METRICS_PORT: "8001"
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: 4
+
+  # ── Transaction Producer (load gen) ─────────
+  producer:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: sentinel-producer
+    entrypoint: ["python", "-m", "streaming.producer"]
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      KAFKA_TOPIC: transactions
+      PRODUCER_RATE: "500"
+      PRODUCER_DURATION: "60"
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+    profiles:
+      - loadtest
+
+  # ── Prometheus ──────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: sentinel-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    depends_on:
+      - api
+
+  # ── Grafana ─────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: sentinel-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: sentinel
+      GF_SECURITY_ADMIN_USER: admin
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  redpanda_data:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:

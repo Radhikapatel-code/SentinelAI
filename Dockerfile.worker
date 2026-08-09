@@ -1,0 +1,29 @@
+# ──────────────────────────────────────────────
+# SentinelAI — Worker Container
+# ──────────────────────────────────────────────
+# Scoring worker (no FastAPI/Streamlit — just the scoring pipeline)
+# Scale independently: docker compose up --scale worker=N
+
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt requirements-streaming.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-streaming.txt
+
+# Copy application code
+COPY config.py config.yaml ./
+COPY models/ models/
+COPY decision_engine/ decision_engine/
+COPY explainability/ explainability/
+COPY streaming/ streaming/
+COPY data/transactions.csv data/transactions.csv
+
+# Default: run as consumer worker
+ENTRYPOINT ["python", "-m", "streaming.consumer"]
