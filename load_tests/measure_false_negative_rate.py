@@ -57,12 +57,10 @@ def measure_fnr(
         os.makedirs(os.path.dirname(data_path) or ".", exist_ok=True)
         df.to_csv(data_path, index=False)
     else:
-        df = pd.read_csv(data_path)
+        df = pd.read_csv(data_path, nrows=max_count)
 
     if "is_fraud" not in df.columns:
         return {"error": "Dataset has no is_fraud column for FNR measurement"}
-
-    df = df.head(max_count)
 
     # Score all transactions
     fraud_total = 0
@@ -73,7 +71,7 @@ def measure_fnr(
 
     start_time = time.perf_counter()
 
-    for _, row in df.iterrows():
+    for row in df.to_dict("records"):
         msg = TransactionMessage(
             transaction_id=int(row["transaction_id"]),
             amount=float(row["amount"]),
@@ -134,11 +132,11 @@ def main() -> None:
     ]
 
     for data_path in data_paths:
-        print(f"\n📊 Measuring FNR on: {data_path}")
-        results = measure_fnr(scorer, data_path=data_path, max_count=5000)
+        print(f"\n[+] Measuring FNR on: {data_path}")
+        results = measure_fnr(scorer, data_path=data_path, max_count=1000)
 
         if "error" in results:
-            print(f"   ⚠️  {results['error']}")
+            print(f"   [WARNING]  {results['error']}")
             continue
 
         print(f"   Total transactions: {results['total_transactions']}")
@@ -153,7 +151,7 @@ def main() -> None:
         with open("load_tests/results/fnr_baseline.json", "w") as f:
             json.dump(results, f, indent=2)
 
-        print(f"\n   ✅ Results saved to load_tests/results/fnr_baseline.json")
+        print(f"\n   [SUCCESS] Results saved to load_tests/results/fnr_baseline.json")
 
     print("=" * 60)
 

@@ -1,0 +1,16 @@
+{
+  "total_transactions": 1000,
+  "fraud_transactions": 12,
+  "legit_transactions": 988,
+  "fraud_approved_false_negatives": 0,
+  "legit_blocked_false_positives": 10,
+  "false_negative_rate": 0.0,
+  "false_positive_rate": 0.010121,
+  "decisions": {
+    "approve": 476,
+    "block": 22,
+    "review": 502
+  },
+  "throughput_tx_sec": 28.6,
+  "total_time_seconds": 34.934
+}

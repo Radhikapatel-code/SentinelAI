@@ -80,6 +80,42 @@ def run_single_worker_benchmark(
     }
 
 
+def _worker_task(worker_id: int, count_per_worker: int, result_queue):
+    """Top-level worker process task for Windows multiprocessing compatibility."""
+    scorer = ThreadSafeScorer(
+        data_path="data/transactions.csv",
+        worker_id=f"bench-worker-{worker_id}",
+    )
+
+    latencies = []
+    start_time = time.perf_counter()
+
+    for tx_id in range(
+        worker_id * count_per_worker + 1,
+        (worker_id + 1) * count_per_worker + 1,
+    ):
+        msg = TransactionMessage(
+            transaction_id=tx_id,
+            amount=500.0,
+            transaction_time=14,
+            location_change=0,
+            device_change=0,
+            merchant_risk=0.2,
+        )
+
+        t0 = time.perf_counter()
+        scorer.score(msg)
+        latencies.append((time.perf_counter() - t0) * 1000)
+
+    elapsed = time.perf_counter() - start_time
+    result_queue.put({
+        "worker_id": worker_id,
+        "count": count_per_worker,
+        "elapsed_seconds": elapsed,
+        "latencies": latencies,
+    })
+
+
 def run_multiworker_benchmark(
     worker_count: int,
     count_per_worker: int = 500,
@@ -96,41 +132,6 @@ def run_multiworker_benchmark(
     import multiprocessing
     import numpy as np
 
-    def worker_task(worker_id: int, result_queue):
-        """Worker process: score transactions and report results."""
-        scorer = ThreadSafeScorer(
-            data_path="data/transactions.csv",
-            worker_id=f"bench-worker-{worker_id}",
-        )
-
-        latencies = []
-        start_time = time.perf_counter()
-
-        for tx_id in range(
-            worker_id * count_per_worker + 1,
-            (worker_id + 1) * count_per_worker + 1,
-        ):
-            msg = TransactionMessage(
-                transaction_id=tx_id,
-                amount=500.0,
-                transaction_time=14,
-                location_change=0,
-                device_change=0,
-                merchant_risk=0.2,
-            )
-
-            t0 = time.perf_counter()
-            scorer.score(msg)
-            latencies.append((time.perf_counter() - t0) * 1000)
-
-        elapsed = time.perf_counter() - start_time
-        result_queue.put({
-            "worker_id": worker_id,
-            "count": count_per_worker,
-            "elapsed_seconds": elapsed,
-            "latencies": latencies,
-        })
-
     result_queue = multiprocessing.Queue()
     processes = []
 
@@ -138,8 +139,8 @@ def run_multiworker_benchmark(
 
     for i in range(worker_count):
         p = multiprocessing.Process(
-            target=worker_task,
-            args=(i, result_queue),
+            target=_worker_task,
+            args=(i, count_per_worker, result_queue),
         )
         p.start()
         processes.append(p)
@@ -198,7 +199,7 @@ def main() -> None:
     print("=" * 60)
 
     # Single-worker baseline
-    print("\n📊 Single-worker baseline benchmark...")
+    print("\n[+] Single-worker baseline benchmark...")
     scorer = ThreadSafeScorer(
         data_path="data/transactions.csv",
         worker_id="bench-baseline",
@@ -212,7 +213,7 @@ def main() -> None:
     results = {"baseline": baseline, "scaling": []}
 
     for wc in worker_counts:
-        print(f"\n📊 {wc}-worker benchmark...")
+        print(f"\n[+] {wc}-worker benchmark...")
         result = run_multiworker_benchmark(
             worker_count=wc,
             count_per_worker=args.count // wc if wc > 1 else args.count,
@@ -252,7 +253,7 @@ def main() -> None:
                 r["latency_p99_ms"],
             ])
 
-    print(f"\n✅ Results saved:")
+    print(f"\n[SUCCESS] Results saved:")
     print(f"   {results_path}")
     print(f"   {csv_path}")
     print("=" * 60)
