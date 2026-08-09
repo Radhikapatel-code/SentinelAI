@@ -37,7 +37,8 @@ The headline requirement for real-time streaming systems: **Model accuracy must 
 | Evaluation Metric | Value | Detail |
 |-------------------|-------|--------|
 | **Total Test Dataset** | 1,000 transactions | Labeled streaming subset |
-| **Base Fraud Rate** | **0.173%** | 12 ground-truth fraud transactions in 1,000 tx sample |
+| **Kaggle Base Fraud Rate** | **0.173%** | ~1.7 cases per 1,000 random transactions |
+| **Fraud Sample Stratification** | **12 fraud cases (1.2% rate)** | Evaluation set stratified to include 12 known fraud cases (base rate 0.173% would yield ~1–2 in a random 1,000-row sample) to make FNR statistically meaningful |
 | **Approved Fraud (False Negatives)** | **0 transactions** | 0 fraud transactions approved |
 | **False Negative Rate (FNR)** | **0.00%** | **0 / 12 fraud cases approved** (held constant across all runs) |
 | **False Positive Rate (FPR)** | **1.01%** | 10 legit transactions sent to block |

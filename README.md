@@ -113,7 +113,7 @@ See [Load Test Results](docs/LOAD_TEST_RESULTS.md) for full metrics.
 > 🎯 **Hardware Bottleneck & Model Quality**:
 > - **1 → 2 Workers**: Scales near-linearly (**1.74x**) within sub-25ms p99 latency (**23.01ms**) on dedicated physical cores.
 > - **4 → 8 Workers**: Saturates 4 physical CPU cores; OS thread scheduling context-switching increases p99 latency to **47.18ms** (4 workers) and **118.80ms** (8 workers).
-> - **Model Quality**: **0.00% False Negative Rate** (0 / 12 fraud cases approved out of 1,000 test transactions; 0.173% base fraud rate).
+> - **Model Quality**: **0.00% False Negative Rate** (0 / 12 fraud cases approved out of 1,000 test transactions). *Note: Evaluation set stratified to include 12 known fraud cases (base rate 0.173% would yield ~1–2 in a random 1,000-row sample) to make FNR statistically meaningful.*
 
 ---
 
